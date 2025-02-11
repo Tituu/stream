@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Streaming Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        iframe { width: 80%; height: 500px; margin-top: 20px; border: none; }
+        /* Block common ad classes */
+        iframe[src*="ads"],
+        iframe[src*="pop"],
+        div[id*="ads"],
+        div[class*="ads"] {
+            display: none !important;
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-center min-h-screen p-6">
 
-    <h2>Streaming Player</h2>
-    <iframe id="streamFrame"></iframe>
+    <h2 class="text-xl font-bold mb-4 text-gray-100">Streaming Player</h2>
+    <iframe id="streamFrame" class="w-full max-w-3xl h-[500px] rounded-lg border border-gray-700"></iframe>
 
     <script>
         function getQueryParam(param) {
@@ -25,11 +31,48 @@
         let season = getQueryParam("season");
         let episode = getQueryParam("episode");
 
-        let embedUrl = type === "series" 
-            ? `https://vidsrc.cc/embed/tv/${tmdbId}/${season}/${episode}`
-            : `https://vidsrc.cc/embed/${tmdbId}`;
+        if (!tmdbId) {
+            document.body.innerHTML = "<h2 class='text-red-500 text-center'>Error: No TMDb/IMDb ID provided</h2>";
+        } else {
+            let embedUrl = type === "series" 
+                ? `https://vidsrc.cc/embed/tv/${tmdbId}/${season}/${episode}`
+                : `https://vidsrc.cc/embed/${tmdbId}`;
 
-        document.getElementById("streamFrame").src = embedUrl;
+            document.getElementById("streamFrame").src = embedUrl;
+        }
+
+        // Remove ads from iframe
+        function removeIframeAds() {
+            let iframe = document.getElementById("streamFrame");
+            let adPatterns = ["ads", "pop", "banner", "sponsor", "tracker"];
+            
+            let observer = new MutationObserver(() => {
+                let iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                adPatterns.forEach(pattern => {
+                    iframeDoc.querySelectorAll(`[id*='${pattern}'], [class*='${pattern}']`).forEach(ad => ad.remove());
+                });
+            });
+
+            observer.observe(iframe, { childList: true, subtree: true });
+        }
+
+        // Block external ad scripts
+        function blockExternalAds() {
+            let adKeywords = ["ads", "popunder", "banner", "tracking", "sponsor"];
+            let scripts = document.querySelectorAll("script[src]");
+            scripts.forEach(script => {
+                adKeywords.forEach(keyword => {
+                    if (script.src.includes(keyword)) {
+                        script.remove();
+                    }
+                });
+            });
+        }
+
+        setInterval(() => {
+            removeIframeAds();
+            blockExternalAds();
+        }, 2000);
     </script>
 
 </body>
