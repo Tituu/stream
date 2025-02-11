@@ -3,50 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Page</title>
+    <title>Stream Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-center min-h-screen p-6">
+<body class="bg-gray-900 text-gray-200 flex justify-center items-center min-h-screen p-4">
 
-    <h2 id="movieTitle" class="text-2xl font-bold mb-4 text-gray-100">Loading...</h2>
-    <iframe id="streamFrame" class="w-full max-w-3xl h-[500px] rounded-lg border border-gray-700"></iframe>
+    <div class="w-full max-w-4xl p-6 bg-gray-800 rounded-lg shadow-lg">
+        <h2 id="contentTitle" class="text-2xl font-bold mb-4 text-center text-gray-100">Loading...</h2>
+
+        <div class="aspect-w-16 aspect-h-9 mb-4">
+            <iframe id="streamFrame" class="w-full h-full rounded" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <button onclick="goBack()" 
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-all">
+            Go Back
+        </button>
+    </div>
 
     <script>
-        const TMDB_API_KEY = "YOUR_TMDB_API_KEY";  
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tmdbId = urlParams.get('tmdbId');
+            const type = urlParams.get('type');
+            const provider = urlParams.get('provider');
+            const season = urlParams.get('season');
+            const episode = urlParams.get('episode');
 
-        function getQueryParam(param) {
-            let urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        let tmdbId = getQueryParam("tmdbId");
-        let type = getQueryParam("type");
-        let season = getQueryParam("season");
-        let episode = getQueryParam("episode");
-        let provider = getQueryParam("provider") || "vidsrc.cc";
-
-        async function fetchMovieTitle() {
-            let apiUrl = type === "series"
-                ? `https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${TMDB_API_KEY}`
-                : `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}`;
-
-            try {
-                let response = await fetch(apiUrl);
-                let data = await response.json();
-                document.getElementById("movieTitle").textContent = `Now Streaming: ${data.title || data.name}`;
-            } catch (error) {
-                document.getElementById("movieTitle").textContent = "Title Not Found";
+            if (!tmdbId || !type || !provider) {
+                alert("Missing required parameters.");
+                window.location.href = "index.html";
+                return;
             }
+
+            // Fetch content title from TMDb API
+            fetchTitle(tmdbId, type);
+
+            // Generate embed URL based on provider and content type
+            let embedUrl = generateEmbedUrl(provider, tmdbId, type, season, episode);
+            if (!embedUrl) {
+                alert("Unsupported provider or invalid parameters.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            // Set the iframe source to the embed URL
+            document.getElementById('streamFrame').src = embedUrl;
+        });
+
+        function generateEmbedUrl(provider, tmdbId, type, season, episode) {
+            let embedUrl = '';
+
+            switch (provider) {
+                case 'vidsrc.cc':
+                case 'vidsrc.vip':
+                case 'vidsrc.pro':
+                case 'vidsrc.icu':
+                    embedUrl = `https://${provider}/embed/${tmdbId}`;
+                    if (type === 'series' && season && episode) {
+                        embedUrl += `/${season}/${episode}`;
+                    }
+                    break;
+                default:
+                    embedUrl = null;
+            }
+
+            return embedUrl;
         }
 
-        if (tmdbId) {
-            fetchMovieTitle();
-            let embedUrl = type === "series" 
-                ? `https://${provider}/embed/tv/${tmdbId}/${season}/${episode}`
-                : `https://${provider}/embed/${tmdbId}`;
-            document.getElementById("streamFrame").src = embedUrl;
-        } else {
-            document.body.innerHTML = "<h2 class='text-red-500 text-center'>Error: No TMDb/IMDb ID provided</h2>";
+        function fetchTitle(tmdbId, type) {
+            const apiKey = '55b11132b5aef36e8376418dcce756f2'; // Replace with your TMDb API key
+            const apiUrl = `https://api.themoviedb.org/3/${type}/${tmdbId}?api_key=${apiKey}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const title = data.title || data.name || 'Unknown Title';
+                    document.getElementById('contentTitle').textContent = title;
+                })
+                .catch(error => {
+                    console.error('Error fetching title:', error);
+                    document.getElementById('contentTitle').textContent = 'Unknown Title';
+                });
+        }
+
+        function goBack() {
+            window.history.back();
         }
     </script>
 
