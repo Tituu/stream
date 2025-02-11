@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidsrc.cc Link Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        input, select, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Vidsrc.cc Link Generator</h2>
+        <input type="text" id="tmdbId" placeholder="Enter TMDb/IMDb ID">
+        <select id="type" onchange="toggleEpisodeFields()">
+            <option value="movie">Movie</option>
+            <option value="series">Web Series</option>
+        </select>
+        <input type="number" id="season" placeholder="Season No" style="display: none;">
+        <input type="number" id="episode" placeholder="Episode No" style="display: none;">
+        <button onclick="generateLink()">Open Stream Page</button>
+    </div>
+
+    <script>
+        function toggleEpisodeFields() {
+            let type = document.getElementById("type").value;
+            document.getElementById("season").style.display = type === "series" ? "block" : "none";
+            document.getElementById("episode").style.display = type === "series" ? "block" : "none";
+        }
+
+        function generateLink() {
+            let tmdbId = document.getElementById("tmdbId").value.trim();
+            let type = document.getElementById("type").value;
+            let season = document.getElementById("season").value;
+            let episode = document.getElementById("episode").value;
+
+            if (!tmdbId) {
+                alert("Please enter a TMDb or IMDb ID");
+                return;
+            }
+
+            let url = `stream.html?tmdbId=${tmdbId}&type=${type}`;
+            if (type === "series") {
+                if (!season || !episode) {
+                    alert("Please enter Season and Episode numbers");
+                    return;
+                }
+                url += `&season=${season}&episode=${episode}`;
+            }
+
+            window.location.href = url; // Redirect to stream page
+        }
+    </script>
+
+</body>
+</html>
