@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        iframe { width: 80%; height: 500px; margin-top: 20px; border: none; }
+    </style>
+</head>
+<body>
+
+    <h2>Streaming Player</h2>
+    <iframe id="streamFrame"></iframe>
+
+    <script>
+        function getQueryParam(param) {
+            let urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        let tmdbId = getQueryParam("tmdbId");
+        let type = getQueryParam("type");
+        let season = getQueryParam("season");
+        let episode = getQueryParam("episode");
+
+        let embedUrl = type === "series" 
+            ? `https://vidsrc.cc/embed/tv/${tmdbId}/${season}/${episode}`
+            : `https://vidsrc.cc/embed/${tmdbId}`;
+
+        document.getElementById("streamFrame").src = embedUrl;
+    </script>
+
+</body>
+</html>
