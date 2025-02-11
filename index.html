@@ -9,12 +9,14 @@
 <body class="bg-gray-900 text-gray-200 flex justify-center items-center min-h-screen p-4">
 
     <div class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold mb-4 text-center text-gray-100">Create Stream Link</h2>
+        <h2 class="text-2xl font-bold mb-4 text-center text-gray-100">Generate Stream Link</h2>
 
+        <!-- TMDb/IMDb ID Input -->
         <label class="block text-gray-300 mb-2">Enter TMDb/IMDb ID:</label>
         <input id="tmdbId" type="text" placeholder="e.g., 550 for Fight Club" 
             class="w-full p-3 mb-4 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
+        <!-- Select Movie or Web Series -->
         <label class="block text-gray-300 mb-2">Select Type:</label>
         <select id="type" onchange="toggleEpisodeFields()" 
             class="w-full p-3 mb-4 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -22,6 +24,7 @@
             <option value="series">Web Series</option>
         </select>
 
+        <!-- Show Season & Episode for Web Series -->
         <div id="episodeFields" class="hidden">
             <label class="block text-gray-300 mb-2">Season No:</label>
             <input id="season" type="number" placeholder="Enter Season Number" 
@@ -32,15 +35,7 @@
                 class="w-full p-3 mb-4 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <label class="block text-gray-300 mb-2">Select Streaming Provider:</label>
-        <select id="provider" 
-            class="w-full p-3 mb-4 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="vidsrc.cc">Vidsrc.cc</option>
-            <option value="vidsrc.vip">Vidsrc.vip</option>
-            <option value="vidsrc.pro">Vidsrc.pro</option>
-            <option value="vidsrc.icu">Vidsrc.icu</option>
-        </select>
-
+        <!-- Generate Stream Button -->
         <button onclick="generateLink()" 
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-all">
             Open Stream Page
@@ -59,14 +54,13 @@
             let type = document.getElementById("type").value;
             let season = document.getElementById("season").value;
             let episode = document.getElementById("episode").value;
-            let provider = document.getElementById("provider").value;
 
             if (!tmdbId) {
                 alert("Please enter a valid TMDb/IMDb ID.");
                 return;
             }
 
-            let url = `stream.html?tmdbId=${tmdbId}&type=${type}&provider=${provider}`;
+            let url = `stream.html?tmdbId=${tmdbId}&type=${type}`;
             if (type === "series") {
                 if (!season || !episode) {
                     alert("Please enter Season and Episode numbers.");
