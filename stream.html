@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Content</title>
+    <title>Streaming</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ad Blocker */
+        iframe {
+            pointer-events: none;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-200 flex justify-center items-center min-h-screen p-4">
 
@@ -26,11 +35,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tmdbId = urlParams.get('tmdbId');
             const type = urlParams.get('type');
-            const provider = urlParams.get('provider');
             const season = urlParams.get('season');
             const episode = urlParams.get('episode');
 
-            if (!tmdbId || !type || !provider) {
+            if (!tmdbId || !type) {
                 alert("Missing required parameters.");
                 window.location.href = "index.html";
                 return;
@@ -39,37 +47,15 @@
             // Fetch content title from TMDb API
             fetchTitle(tmdbId, type);
 
-            // Generate embed URL based on provider and content type
-            let embedUrl = generateEmbedUrl(provider, tmdbId, type, season, episode);
-            if (!embedUrl) {
-                alert("Unsupported provider or invalid parameters.");
-                window.location.href = "index.html";
-                return;
+            // Generate correct Vidsrc.cc link
+            let embedUrl = `https://vidsrc.cc/embed/${tmdbId}`;
+            if (type === 'series' && season && episode) {
+                embedUrl += `/${season}/${episode}`;
             }
 
-            // Set the iframe source to the embed URL
+            // Set iframe source
             document.getElementById('streamFrame').src = embedUrl;
         });
-
-        function generateEmbedUrl(provider, tmdbId, type, season, episode) {
-            let embedUrl = '';
-
-            switch (provider) {
-                case 'vidsrc.cc':
-                case 'vidsrc.vip':
-                case 'vidsrc.pro':
-                case 'vidsrc.icu':
-                    embedUrl = `https://${provider}/embed/${tmdbId}`;
-                    if (type === 'series' && season && episode) {
-                        embedUrl += `/${season}/${episode}`;
-                    }
-                    break;
-                default:
-                    embedUrl = null;
-            }
-
-            return embedUrl;
-        }
 
         function fetchTitle(tmdbId, type) {
             const apiKey = '55b11132b5aef36e8376418dcce756f2'; // Replace with your TMDb API key
